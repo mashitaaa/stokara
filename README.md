@@ -1,6 +1,6 @@
 # STOKARA - Inventori & Penyaluran Gerai Kopdes Merah Putih
 
-Aplikasi desktop **WPF (.NET 10) + SQL Server** dengan pola **MVVM**, dibangun mengikuti *PRD STOKARA v1.1*.
+Aplikasi desktop **WPF (.NET 10) + SQL Server** dengan pola **MVVM**.
 Berjalan offline di satu komputer gerai.
 
 ---
