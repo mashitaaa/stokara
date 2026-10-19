@@ -1,0 +1,51 @@
+<!-- Tema "Bata dan Padi" - Light. Token warna sesuai PRD v1.1 bagian 10.4. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="BrushPrimary" Color="#A8442B"/>
+    <SolidColorBrush x:Key="BrushPrimaryHover" Color="#8C3520"/>
+    <SolidColorBrush x:Key="BrushPrimarySoft" Color="#F3DED6"/>
+    <SolidColorBrush x:Key="BrushOnPrimary" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BrushAccent" Color="#C9962B"/>
+    <SolidColorBrush x:Key="BrushOnAccent" Color="#2B2118"/>
+    <SolidColorBrush x:Key="BrushSecondary" Color="#4F6B4A"/>
+    <SolidColorBrush x:Key="BrushBackground" Color="#F6F0E4"/>
+    <SolidColorBrush x:Key="BrushSurface" Color="#FFFBF2"/>
+    <SolidColorBrush x:Key="BrushSurfaceAlt" Color="#F1E9D8"/>
+    <SolidColorBrush x:Key="BrushBorder" Color="#E3D8C3"/>
+    <SolidColorBrush x:Key="BrushTextPrimary" Color="#2B2118"/>
+    <SolidColorBrush x:Key="BrushTextSecondary" Color="#6B5B4B"/>
+    <SolidColorBrush x:Key="BrushTextDisabled" Color="#A99A88"/>
+    <SolidColorBrush x:Key="BrushSelection" Color="#F1D6CB"/>
+    <SolidColorBrush x:Key="BrushHover" Color="#F4ECDD"/>
+    <SolidColorBrush x:Key="BrushSuccess" Color="#3F6B3A"/>
+    <SolidColorBrush x:Key="BrushWarning" Color="#B9770E"/>
+    <SolidColorBrush x:Key="BrushDanger" Color="#B3261E"/>
+    <SolidColorBrush x:Key="BrushDangerHover" Color="#8E1B15"/>
+    <SolidColorBrush x:Key="BrushInfo" Color="#1F6F6B"/>
+    <SolidColorBrush x:Key="BrushSidebar" Color="#33251C"/>
+    <SolidColorBrush x:Key="BrushSidebarHover" Color="#45332700"/>
+    <SolidColorBrush x:Key="BrushSidebarItemHover" Color="#4A372A"/>
+    <SolidColorBrush x:Key="BrushSidebarText" Color="#F1E8D8"/>
+    <SolidColorBrush x:Key="BrushSidebarMuted" Color="#B9A58E"/>
+    <SolidColorBrush x:Key="BrushSidebarActive" Color="#A8442B"/>
+    <SolidColorBrush x:Key="BadgeAmanBg" Color="#E4EEDD"/>
+    <SolidColorBrush x:Key="BadgeAmanFg" Color="#2F5A2B"/>
+    <SolidColorBrush x:Key="BadgeMenipisBg" Color="#F8E7C6"/>
+    <SolidColorBrush x:Key="BadgeMenipisFg" Color="#7A4A06"/>
+    <SolidColorBrush x:Key="BadgeHabisBg" Color="#F6D9D5"/>
+    <SolidColorBrush x:Key="BadgeHabisFg" Color="#8E1B15"/>
+    <SolidColorBrush x:Key="BadgeSubsidiBg" Color="#D6ECEA"/>
+    <SolidColorBrush x:Key="BadgeSubsidiFg" Color="#14524F"/>
+    <SolidColorBrush x:Key="BadgeTitipanBg" Color="#E4DFF0"/>
+    <SolidColorBrush x:Key="BadgeTitipanFg" Color="#43366B"/>
+    <SolidColorBrush x:Key="BadgeNeutralBg" Color="#ECE4D4"/>
+    <SolidColorBrush x:Key="BadgeNeutralFg" Color="#5A4B3C"/>
+    <SolidColorBrush x:Key="ChartSeries1" Color="#A8442B"/>
+    <SolidColorBrush x:Key="ChartSeries2" Color="#C9962B"/>
+    <SolidColorBrush x:Key="ChartSeries3" Color="#4F6B4A"/>
+    <SolidColorBrush x:Key="ChartSeries4" Color="#1F6F6B"/>
+    <SolidColorBrush x:Key="BrushChartGrid" Color="#E8DECB"/>
+    <SolidColorBrush x:Key="BrushOverlay" Color="#80241A12"/>
+    <Color x:Key="ShadowColor">#40261A10</Color>
+    <Color x:Key="PrimaryColor">#A8442B</Color>
+</ResourceDictionary>

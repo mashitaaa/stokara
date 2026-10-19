@@ -1,0 +1,123 @@
+<UserControl x:Class="Stokara.Views.OpnameView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Stokara.Controls">
+    <Grid Margin="28,20,28,24">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="340"/>
+            <ColumnDefinition Width="18"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Daftar sesi + sesi baru -->
+        <DockPanel>
+            <Border DockPanel.Dock="Top" Style="{StaticResource Card}" Margin="0,0,0,14"
+                    Visibility="{Binding CanInput, Converter={StaticResource BoolToVis}}">
+                <StackPanel>
+                    <TextBlock Text="Sesi opname baru" Style="{StaticResource TextH3}" Margin="0,0,0,10"/>
+                    <TextBlock Text="Cakupan" Style="{StaticResource TextLabel}"/>
+                    <ComboBox ItemsSource="{Binding KategoriList}" SelectedItem="{Binding KategoriBaru}" DisplayMemberPath="Nama" Margin="0,0,0,10"/>
+                    <TextBlock Text="Catatan" Style="{StaticResource TextLabel}"/>
+                    <TextBox Text="{Binding CatatanBaru}" c:UiProps.Placeholder="mis. opname akhir bulan" Margin="0,0,0,12"/>
+                    <Button Content="Buat Sesi" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE710;" Command="{Binding CreateCommand}"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Card}" Padding="8">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Riwayat sesi" Style="{StaticResource TextH3}" Margin="8,6,8,8"/>
+                    <ListBox ItemsSource="{Binding Sesi}" SelectedItem="{Binding Selected}" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding NomorDokumen}" FontWeight="SemiBold"/>
+                                        <TextBlock Style="{StaticResource TextMuted}" FontSize="12">
+                                            <Run Text="{Binding Tanggal, Mode=OneWay, StringFormat='dd/MM/yyyy'}"/><Run Text=" · "/><Run Text="{Binding Kategori, Mode=OneWay}"/>
+                                        </TextBlock>
+                                        <TextBlock Style="{StaticResource TextMuted}" FontSize="12">
+                                            <Run Text="{Binding JumlahSelisih, Mode=OneWay}"/><Run Text=" selisih dari "/><Run Text="{Binding JumlahBarang, Mode=OneWay}"/><Run Text=" barang"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <ContentControl Style="{StaticResource Badge}" Content="{Binding Status}" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+        </DockPanel>
+
+        <!-- Detail sesi -->
+        <Border Grid.Column="2" Style="{StaticResource Card}" Padding="0">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Margin="18,16,18,10">
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Selected.NomorDokumen, FallbackValue='Belum ada sesi opname'}" Style="{StaticResource TextH2}"/>
+                            <TextBlock Style="{StaticResource TextMuted}">
+                                <Run Text="{Binding Selected.Kategori, Mode=OneWay}"/><Run Text=" · dibuat oleh "/><Run Text="{Binding Selected.DibuatOleh, Mode=OneWay}"/>
+                            </TextBlock>
+                        </StackPanel>
+                        <ContentControl Style="{StaticResource Badge}" Content="{Binding Selected.Status}" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="13"/>
+                    </Grid>
+                    <Border Background="{DynamicResource BrushSurfaceAlt}" CornerRadius="8" Padding="12,8" Margin="0,10,0,10"
+                            Visibility="{Binding StatusInfo, Converter={StaticResource NotEmptyToVis}}">
+                        <TextBlock Text="{Binding StatusInfo}" TextWrapping="Wrap"/>
+                    </Border>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Progress}" Style="{StaticResource TextMuted}"/>
+                            <ProgressBar Value="{Binding ProgressPersen, Mode=OneWay}" Maximum="100" Margin="0,6,20,0"/>
+                        </StackPanel>
+                        <CheckBox Grid.Column="1" Content="Hanya yang berselisih" IsChecked="{Binding HanyaSelisih}" VerticalAlignment="Center"/>
+                    </Grid>
+                </StackPanel>
+
+                <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,1,0,0" Padding="16,12">
+                    <Grid>
+                        <StackPanel Orientation="Horizontal" Visibility="{Binding IsDraft, Converter={StaticResource BoolToVis}}">
+                            <Button Content="Isi sama dengan sistem" Style="{StaticResource ButtonGhost}" c:UiProps.Icon="&#xE8C8;"
+                                    ToolTip="Isi baris yang masih kosong dengan stok sistem (untuk barang yang hitungannya cocok)"
+                                    Command="{Binding SamakanCommand}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Simpan Draft" Style="{StaticResource ButtonSecondary}" c:UiProps.Icon="&#xE74E;" Margin="0,0,8,0"
+                                    Command="{Binding SaveCommand}" Visibility="{Binding IsDraft, Converter={StaticResource BoolToVis}}"/>
+                            <Button Content="Ajukan Penyesuaian" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE724;"
+                                    Command="{Binding SubmitCommand}" Visibility="{Binding IsDraft, Converter={StaticResource BoolToVis}}"/>
+                            <Button Content="Tolak" Style="{StaticResource ButtonDanger}" c:UiProps.Icon="&#xE711;" Margin="0,0,8,0"
+                                    Command="{Binding RejectCommand}" Visibility="{Binding CanDecide, Converter={StaticResource BoolToVis}}"/>
+                            <Button Content="Setujui" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE8FB;"
+                                    Command="{Binding ApproveCommand}" Visibility="{Binding CanDecide, Converter={StaticResource BoolToVis}}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <DataGrid ItemsSource="{Binding Detail}" IsReadOnly="{Binding IsDraft, Converter={StaticResource InverseBool}}"
+                          BorderThickness="0" Background="Transparent" SelectionUnit="Cell">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="SKU" Binding="{Binding SKU}" IsReadOnly="True" Width="100"/>
+                        <DataGridTextColumn Header="Barang" Binding="{Binding BarangNama}" IsReadOnly="True" Width="*"/>
+                        <DataGridTextColumn Header="Satuan" Binding="{Binding Satuan}" IsReadOnly="True" Width="80"/>
+                        <DataGridTextColumn Header="Stok sistem" Binding="{Binding StokSistem, StringFormat='#,0.##'}" IsReadOnly="True" Width="100"/>
+                        <DataGridTextColumn Header="Stok fisik ✎" Width="110" EditingElementStyle="{StaticResource CellEditBox}"
+                                            Binding="{Binding StokFisik, StringFormat='#,0.##', TargetNullValue='', UpdateSourceTrigger=PropertyChanged}"/>
+                        <DataGridTemplateColumn Header="Selisih" Width="90" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding SelisihLabel}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Alasan selisih ✎" Width="1.3*" EditingElementStyle="{StaticResource CellEditBox}"
+                                            Binding="{Binding Alasan, UpdateSourceTrigger=PropertyChanged}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,74 @@
+<UserControl x:Class="Stokara.Views.BantuanView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="28,22,28,28">
+            <TextBlock Text="Panduan singkat" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="Langkah-langkah pekerjaan harian di gerai. Arahkan kursor ke tombol untuk melihat keterangan."
+                       Style="{StaticResource TextMuted}" FontSize="13.5" Margin="0,0,0,18"/>
+
+            <ItemsControl ItemsSource="{Binding Bagian}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="3"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource Card}" Margin="0,0,14,14">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                    <Border Width="36" Height="36" CornerRadius="18" Background="{DynamicResource BrushPrimary}">
+                                        <TextBlock Text="{Binding Ikon}" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource BrushOnPrimary}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding Judul}" Style="{StaticResource TextH3}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding Langkah}" AlternationCount="20">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="26"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Width="20" Height="20" CornerRadius="10" Background="{DynamicResource BrushSurfaceAlt}" VerticalAlignment="Top">
+                                                    <TextBlock FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Text="{Binding (ItemsControl.AlternationIndex), RelativeSource={RelativeSource AncestorType=ContentPresenter}, Converter={StaticResource StepNumber}}"/>
+                                                </Border>
+                                                <TextBlock Grid.Column="1" Text="{Binding}" Style="{StaticResource TextBody}" FontSize="13.5"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Border Style="{StaticResource Card}" Width="520" HorizontalAlignment="Left">
+                <StackPanel>
+                    <TextBlock Text="Pintasan keyboard" Style="{StaticResource TextH3}" Margin="0,0,0,10"/>
+                    <ItemsControl ItemsSource="{Binding Pintasan}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="110"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Background="{DynamicResource BrushSurfaceAlt}" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left"
+                                            BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+                                        <TextBlock Text="{Binding Key}" FontFamily="Consolas" FontWeight="SemiBold"/>
+                                    </Border>
+                                    <TextBlock Grid.Column="1" Text="{Binding Value}" VerticalAlignment="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

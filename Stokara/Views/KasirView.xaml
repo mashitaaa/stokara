@@ -1,0 +1,340 @@
+<UserControl x:Class="Stokara.Views.KasirView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Stokara.Controls">
+    <UserControl.Resources>
+        <!-- Tombol daftar (hasil cari anggota/penerima) -->
+        <Style x:Key="ListButton" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="Transparent" CornerRadius="8" Padding="10,7">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BrushHover}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="28,20,28,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="390"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Mode kasir (A-10): satu transaksi hanya satu jenis -->
+        <Grid Grid.ColumnSpan="3" Margin="0,0,0,16">
+            <Border Style="{StaticResource SegmentHost}">
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton Style="{StaticResource Segment}" Content="Penjualan" c:UiProps.Icon="&#xE7BF;" GroupName="mode"
+                                 IsChecked="{Binding ModePenjualanChecked}"/>
+                    <RadioButton Style="{StaticResource Segment}" Content="Penyaluran Subsidi" c:UiProps.Icon="&#xE9D9;" GroupName="mode"
+                                 IsChecked="{Binding ModeSubsidiChecked}"/>
+                </StackPanel>
+            </Border>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <ContentControl Style="{StaticResource Badge}" Content="SUBSIDI" Margin="0,0,8,0"
+                                Visibility="{Binding IsSubsidi, Converter={StaticResource BoolToVis}}"/>
+                <TextBlock Style="{StaticResource TextMuted}" VerticalAlignment="Center"
+                           Text="{Binding Periode, StringFormat='Periode kuota {0} · HET dan kuota diperiksa otomatis'}"
+                           Visibility="{Binding IsSubsidi, Converter={StaticResource BoolToVis}}"/>
+                <TextBlock Style="{StaticResource TextMuted}" VerticalAlignment="Center"
+                           Text="Harga anggota diterapkan otomatis saat anggota dipilih"
+                           Visibility="{Binding IsPenjualan, Converter={StaticResource BoolToVis}}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- ========== Kiri: scan + keranjang ========== -->
+        <DockPanel Grid.Row="1">
+            <Grid DockPanel.Dock="Top" Margin="0,0,0,14">
+                <TextBox x:Name="SearchBox" Style="{StaticResource TextBoxLarge}"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         c:UiProps.Placeholder="{Binding SearchPlaceholder}" c:UiProps.FocusOnLoad="True"
+                         PreviewKeyDown="SearchBox_PreviewKeyDown" Padding="44,8,14,8">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding ScanCommand}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
+                <TextBlock Text="&#xE8B3;" Style="{StaticResource TextIcon}" FontSize="18" Margin="16,0,0,0" HorizontalAlignment="Left"
+                           IsHitTestVisible="False"/>
+                <Popup IsOpen="{Binding IsSuggestOpen}" PlacementTarget="{Binding ElementName=SearchBox}" Placement="Bottom"
+                       StaysOpen="False" AllowsTransparency="True" Width="{Binding ActualWidth, ElementName=SearchBox}">
+                    <Border Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1"
+                            CornerRadius="10" Margin="0,6,0,0" Padding="6" MaxHeight="380">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="18" ShadowDepth="3" Opacity="0.18" Color="#000000"/>
+                        </Border.Effect>
+                        <ListBox x:Name="SuggestList" ItemsSource="{Binding Suggestions}" SelectedItem="{Binding SelectedSuggestion}"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource ListButton}" Padding="0"
+                                            Command="{Binding DataContext.AddSuggestionCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                            CommandParameter="{Binding}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Nama}" FontWeight="SemiBold"/>
+                                                    <ContentControl Style="{StaticResource Badge}" Content="{Binding JenisLabel}" Margin="8,0,0,0"/>
+                                                </StackPanel>
+                                                <TextBlock Style="{StaticResource TextMuted}" FontSize="12">
+                                                    <Run Text="{Binding SKU, Mode=OneWay}"/><Run Text=" · stok "/><Run Text="{Binding StokSaatIni, Mode=OneWay, StringFormat='#,0.##'}"/>
+                                                    <Run Text="{Binding SatuanNama, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                                                <TextBlock Text="{Binding HargaUmum, Converter={StaticResource Rupiah}}" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                                                <TextBlock Text="{Binding HargaAnggota, Converter={StaticResource Rupiah}, StringFormat='anggota {0}'}"
+                                                           Style="{StaticResource TextMuted}" FontSize="11.5" HorizontalAlignment="Right"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Border>
+                </Popup>
+            </Grid>
+
+            <Border Style="{StaticResource Card}" Padding="0">
+                <Grid>
+                    <DataGrid ItemsSource="{Binding Cart}" SelectedItem="{Binding SelectedItem}" BorderThickness="0" RowHeight="52"
+                              Background="Transparent">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Barang" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Nama}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Satuan}" Style="{StaticResource TextMuted}" FontSize="12"/>
+                                                <ContentControl Style="{StaticResource Badge}" Content="{Binding Jenis}" Margin="8,0,0,0" FontSize="10.5"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Harga" Width="120" Binding="{Binding Harga, Converter={StaticResource Rupiah}}"/>
+                            <DataGridTemplateColumn Header="Jumlah" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Button Style="{StaticResource ButtonSecondary}" c:UiProps.Icon="&#xE738;" Padding="8,6" Width="34"
+                                                    Command="{Binding DataContext.DecreaseCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" ToolTip="Kurangi"/>
+                                            <TextBlock Text="{Binding Jumlah, StringFormat='#,0.##'}" FontSize="16" FontWeight="SemiBold"
+                                                       MinWidth="40" TextAlignment="Center" VerticalAlignment="Center"/>
+                                            <Button Style="{StaticResource ButtonSecondary}" c:UiProps.Icon="&#xE710;" Padding="8,6" Width="34"
+                                                    Command="{Binding DataContext.IncreaseCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" ToolTip="Tambah"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Subtotal" Width="130" Binding="{Binding Subtotal, Converter={StaticResource Rupiah}}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="TextAlignment" Value="Right"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTemplateColumn Width="54">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Style="{StaticResource ButtonIcon}" c:UiProps.Icon="&#xE74D;" ToolTip="Hapus dari keranjang"
+                                                Foreground="{DynamicResource BrushDanger}"
+                                                Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <!-- Empty state -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" IsHitTestVisible="False"
+                                Visibility="{Binding Cart.Count, Converter={StaticResource NotEmptyToVis}, ConverterParameter=Invert}">
+                        <TextBlock Text="&#xE7BF;" FontFamily="Segoe MDL2 Assets" FontSize="46" HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource BrushTextDisabled}"/>
+                        <TextBlock Text="Keranjang masih kosong" Style="{StaticResource TextH3}" HorizontalAlignment="Center" Margin="0,12,0,4"/>
+                        <TextBlock Text="Scan barcode atau ketik nama barang di kolom atas, lalu tekan Enter." Style="{StaticResource TextMuted}"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DockPanel>
+
+        <!-- ========== Kanan: pelanggan/penerima + pembayaran ========== -->
+        <DockPanel Grid.Row="1" Grid.Column="2">
+            <!-- Pembayaran -->
+            <Border DockPanel.Dock="Bottom" Style="{StaticResource Card}" Margin="0,14,0,0">
+                <StackPanel>
+                    <Grid>
+                        <TextBlock Text="Total" Style="{StaticResource TextMuted}" FontSize="14" VerticalAlignment="Bottom"/>
+                        <TextBlock HorizontalAlignment="Right" Style="{StaticResource TextMuted}" VerticalAlignment="Bottom"
+                                   Text="{Binding JumlahItem, StringFormat='{}{0} jenis barang'}"/>
+                    </Grid>
+                    <TextBlock Text="{Binding Total, Converter={StaticResource Rupiah}}" FontSize="34" FontWeight="Bold"
+                               Foreground="{DynamicResource BrushPrimary}" Margin="0,2,0,12"/>
+                    <TextBlock Text="Uang diterima (tunai)" Style="{StaticResource TextLabel}"/>
+                    <TextBox Text="{Binding UangText, UpdateSourceTrigger=PropertyChanged}" FontSize="18" c:UiProps.Placeholder="Kosongkan = uang pas"/>
+                    <WrapPanel Margin="0,8,0,0">
+                        <Button Content="Uang pas" Style="{StaticResource ButtonSecondary}" Padding="10,5" FontSize="12.5" Margin="0,0,6,6"
+                                Command="{Binding UangPasCommand}"/>
+                        <Button Content="20.000" Style="{StaticResource ButtonSecondary}" Padding="10,5" FontSize="12.5" Margin="0,0,6,6"
+                                Command="{Binding UangCepatCommand}" CommandParameter="20000"/>
+                        <Button Content="50.000" Style="{StaticResource ButtonSecondary}" Padding="10,5" FontSize="12.5" Margin="0,0,6,6"
+                                Command="{Binding UangCepatCommand}" CommandParameter="50000"/>
+                        <Button Content="100.000" Style="{StaticResource ButtonSecondary}" Padding="10,5" FontSize="12.5" Margin="0,0,6,6"
+                                Command="{Binding UangCepatCommand}" CommandParameter="100000"/>
+                    </WrapPanel>
+                    <Grid Margin="0,6,0,14">
+                        <TextBlock Text="Kembalian" Style="{StaticResource TextBody}"/>
+                        <TextBlock Text="{Binding Kembalian, Converter={StaticResource Rupiah}}" HorizontalAlignment="Right" FontSize="18" FontWeight="Bold"/>
+                    </Grid>
+                    <TextBlock Text="Uang diterima kurang dari total." Foreground="{DynamicResource BrushDanger}" FontSize="12.5" Margin="0,-8,0,10"
+                               Visibility="{Binding UangKurang, Converter={StaticResource BoolToVis}}"/>
+                    <Button Style="{StaticResource ButtonPay}" c:UiProps.Icon="&#xE8FB;" Command="{Binding BayarCommand}"
+                            Content="Bayar &amp; Simpan  (Ctrl+S)"/>
+                    <Grid Margin="0,10,0,0">
+                        <Button Content="Kosongkan" Style="{StaticResource ButtonGhost}" c:UiProps.Icon="&#xE711;" HorizontalAlignment="Left"
+                                Command="{Binding ClearCommand}"/>
+                        <Button Content="Cetak ulang struk terakhir" Style="{StaticResource ButtonGhost}" c:UiProps.Icon="&#xE749;"
+                                HorizontalAlignment="Right" Command="{Binding CetakUlangCommand}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Pelanggan (mode Penjualan) -->
+            <Border Style="{StaticResource Card}" Visibility="{Binding IsPenjualan, Converter={StaticResource BoolToVis}}">
+                <StackPanel>
+                    <TextBlock Text="Pelanggan" Style="{StaticResource TextH3}" Margin="0,0,0,10"/>
+                    <Border Style="{StaticResource SegmentHost}">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Style="{StaticResource Segment}" Content="Umum" GroupName="pel" IsChecked="{Binding IsUmum}"/>
+                            <RadioButton Style="{StaticResource Segment}" Content="Anggota" GroupName="pel" IsChecked="{Binding IsAnggota}"/>
+                        </StackPanel>
+                    </Border>
+                    <StackPanel Margin="0,12,0,0" Visibility="{Binding IsAnggota, Converter={StaticResource BoolToVis}}">
+                        <Border Background="{DynamicResource BadgeAmanBg}" CornerRadius="8" Padding="12,8" Margin="0,0,0,10"
+                                Visibility="{Binding SelectedAnggota, Converter={StaticResource NotEmptyToVis}}">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding SelectedAnggota.Nama}" FontWeight="SemiBold" Foreground="{DynamicResource BadgeAmanFg}"/>
+                                    <TextBlock Text="{Binding SelectedAnggota.NomorAnggota}" FontSize="12" Foreground="{DynamicResource BadgeAmanFg}"/>
+                                </StackPanel>
+                                <Button HorizontalAlignment="Right" Style="{StaticResource ButtonIcon}" c:UiProps.Icon="&#xE711;" ToolTip="Ganti anggota"
+                                        Command="{Binding ResetPelangganCommand}"/>
+                            </Grid>
+                        </Border>
+                        <TextBox Text="{Binding AnggotaSearch, UpdateSourceTrigger=PropertyChanged}" c:UiProps.Placeholder="Cari nama / nomor anggota / NIK"/>
+                        <ItemsControl ItemsSource="{Binding AnggotaResults}" Margin="0,6,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource ListButton}"
+                                            Command="{Binding DataContext.PilihAnggotaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Nama}" FontWeight="SemiBold"/>
+                                            <TextBlock Style="{StaticResource TextMuted}" FontSize="12">
+                                                <Run Text="{Binding NomorAnggota, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Dusun, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                    <TextBlock Text="Harga umum berlaku. Pilih Anggota untuk harga anggota (hanya anggota aktif)." Style="{StaticResource TextMuted}"
+                               Margin="0,12,0,0" Visibility="{Binding IsAnggota, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Penerima subsidi (mode Penyaluran) -->
+            <Border Style="{StaticResource Card}" Visibility="{Binding IsSubsidi, Converter={StaticResource BoolToVis}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Penerima subsidi" Style="{StaticResource TextH3}" Margin="0,0,0,10"/>
+                        <TextBox Text="{Binding PenerimaSearch, UpdateSourceTrigger=PropertyChanged}" c:UiProps.Placeholder="Cari NIK atau nama penerima"/>
+                        <ItemsControl ItemsSource="{Binding PenerimaResults}" Margin="0,6,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource ListButton}"
+                                            Command="{Binding DataContext.PilihPenerimaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}">
+                                        <Grid>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Nama}" FontWeight="SemiBold"/>
+                                                <TextBlock Style="{StaticResource TextMuted}" FontSize="12">
+                                                    <Run Text="{Binding NikTampil, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding JenisLabel, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <ContentControl Style="{StaticResource Badge}" Content="{Binding Status}" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <TextBlock Text="Belum ada penerima dipilih. Penerima wajib terdaftar dan aktif (BR-08)." Style="{StaticResource TextMuted}"
+                                   Margin="0,10,0,0" Visibility="{Binding HasPenerima, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}"/>
+
+                        <Border Margin="0,10,0,0" CornerRadius="10" Padding="14,12" Background="{DynamicResource BrushSurfaceAlt}"
+                                Visibility="{Binding HasPenerima, Converter={StaticResource BoolToVis}}">
+                            <StackPanel>
+                                <Grid>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding SelectedPenerima.Nama}" FontWeight="Bold" FontSize="15"/>
+                                        <TextBlock Style="{StaticResource TextMuted}">
+                                            <Run Text="{Binding SelectedPenerima.NikTampil, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding SelectedPenerima.JenisLabel, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                                        <ContentControl Style="{StaticResource Badge}" Content="{Binding SelectedPenerima.Status}"/>
+                                        <Button Style="{StaticResource ButtonIcon}" c:UiProps.Icon="&#xE711;" ToolTip="Ganti penerima" Width="28" Height="28"
+                                                Padding="4" Margin="4,-4,0,0" Command="{Binding ResetPelangganCommand}"/>
+                                    </StackPanel>
+                                </Grid>
+                                <TextBlock Text="Sisa kuota periode ini" Style="{StaticResource TextLabel}" Margin="0,12,0,6"/>
+                                <TextBlock Text="Belum ada aturan kuota untuk jenis penerima ini." Style="{StaticResource TextMuted}"
+                                           Visibility="{Binding SisaKuota.Count, Converter={StaticResource NotEmptyToVis}, ConverterParameter=Invert}"/>
+                                <ItemsControl ItemsSource="{Binding SisaKuota}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="0,4,0,6">
+                                                <Grid>
+                                                    <TextBlock Text="{Binding BarangNama}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,0,90,0"/>
+                                                    <TextBlock Text="{Binding Ringkas}" HorizontalAlignment="Right" FontSize="12.5"/>
+                                                </Grid>
+                                                <ProgressBar Value="{Binding PersenTerpakai, Mode=OneWay}" Maximum="100" Margin="0,5,0,0"
+                                                             Foreground="{DynamicResource ChartSeries4}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </DockPanel>
+    </Grid>
+</UserControl>

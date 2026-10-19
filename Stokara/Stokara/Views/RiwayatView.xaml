@@ -1,0 +1,207 @@
+<UserControl x:Class="Stokara.Views.RiwayatView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Stokara.Controls">
+    <Grid Margin="28,18,28,24">
+        <TabControl>
+            <!-- ================= Transaksi ================= -->
+            <TabItem Header="Transaksi">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="18"/>
+                        <ColumnDefinition Width="340"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Filter -->
+                    <WrapPanel Grid.ColumnSpan="3" Margin="0,0,0,14" VerticalAlignment="Bottom">
+                        <StackPanel Margin="0,0,12,0" Visibility="{Binding CanFilterDate, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="Dari" Style="{StaticResource TextLabel}"/>
+                            <DatePicker SelectedDate="{Binding Dari}" Width="150"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,12,0" Visibility="{Binding CanFilterDate, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="Sampai" Style="{StaticResource TextLabel}"/>
+                            <DatePicker SelectedDate="{Binding Sampai}" Width="150"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,12,0">
+                            <TextBlock Text="Jenis" Style="{StaticResource TextLabel}"/>
+                            <ComboBox ItemsSource="{Binding JenisOptions}" SelectedValuePath="Key" DisplayMemberPath="Value"
+                                      SelectedValue="{Binding Jenis}" Width="190"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,12,0">
+                            <TextBlock Text="Cari" Style="{StaticResource TextLabel}"/>
+                            <TextBox x:Name="SearchBox" Text="{Binding Keyword, UpdateSourceTrigger=PropertyChanged}" Width="240"
+                                     c:UiProps.Placeholder="Nomor, nama anggota/penerima">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Enter" Command="{Binding SearchCommand}"/>
+                                </TextBox.InputBindings>
+                            </TextBox>
+                        </StackPanel>
+                        <Button Content="Tampilkan" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE721;" VerticalAlignment="Bottom"
+                                Command="{Binding SearchCommand}"/>
+                    </WrapPanel>
+
+                    <Border Grid.Row="1" Style="{StaticResource Card}" Padding="0">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource BrushBorder}" BorderThickness="0,1,0,0" Padding="16,10">
+                                <Grid>
+                                    <TextBlock Text="{Binding Info}" Style="{StaticResource TextMuted}"/>
+                                    <TextBlock HorizontalAlignment="Right" Style="{StaticResource TextBody}">
+                                        <Run Text="{Binding JumlahAktif, Mode=OneWay}" FontWeight="SemiBold"/><Run Text=" transaksi aktif · "/>
+                                        <Run Text="{Binding TotalAktif, Mode=OneWay, Converter={StaticResource Rupiah}}" FontWeight="Bold"/>
+                                    </TextBlock>
+                                </Grid>
+                            </Border>
+                            <Grid>
+                                <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" BorderThickness="0" Background="Transparent">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Nomor" Binding="{Binding NomorDokumen}" Width="Auto" MinWidth="150"/>
+                                        <DataGridTextColumn Header="Waktu" Binding="{Binding Tanggal, StringFormat='dd/MM/yy HH:mm'}" Width="Auto" MinWidth="110"/>
+                                        <DataGridTextColumn Header="Jenis" Binding="{Binding JenisLabel}" Width="Auto" MinWidth="100"/>
+                                        <DataGridTextColumn Header="Pelanggan / Penerima" Binding="{Binding Pihak}" Width="*" MinWidth="140"/>
+                                        <DataGridTextColumn Header="Total" Binding="{Binding Total, Converter={StaticResource Rupiah}}" Width="Auto" MinWidth="100"/>
+                                        <DataGridTemplateColumn Header="Status" Width="Auto" MinWidth="100">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <ContentControl Style="{StaticResource Badge}" Content="{Binding Status}"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="Kasir" Binding="{Binding Pengguna}" Width="Auto" MinWidth="90"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <TextBlock Text="Tidak ada transaksi pada filter ini." Style="{StaticResource TextMuted}" HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" FontSize="14"
+                                           Visibility="{Binding Items.Count, Converter={StaticResource NotEmptyToVis}, ConverterParameter=Invert}"/>
+                            </Grid>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Detail -->
+                    <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource Card}">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Top">
+                                <TextBlock Text="{Binding Selected.NomorDokumen, FallbackValue='Pilih transaksi'}" Style="{StaticResource TextH3}"/>
+                                <TextBlock Style="{StaticResource TextMuted}" Margin="0,2,0,10">
+                                    <Run Text="{Binding Selected.JenisLabel, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Selected.Pihak, Mode=OneWay}"/>
+                                </TextBlock>
+                                <Border Background="{DynamicResource BadgeHabisBg}" CornerRadius="8" Padding="10,7" Margin="0,0,0,10"
+                                        Visibility="{Binding Selected.AlasanBatal, Converter={StaticResource NotEmptyToVis}}">
+                                    <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource BadgeHabisFg}"
+                                               Text="{Binding Selected.AlasanBatal, StringFormat='Dibatalkan: {0}'}"/>
+                                </Border>
+                            </StackPanel>
+                            <StackPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+                                <Grid Margin="0,0,0,12">
+                                    <TextBlock Text="Total" Style="{StaticResource TextBody}"/>
+                                    <TextBlock Text="{Binding Selected.Total, Converter={StaticResource Rupiah}}" HorizontalAlignment="Right"
+                                               FontSize="18" FontWeight="Bold"/>
+                                </Grid>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Content="Batalkan (void)" Style="{StaticResource ButtonDanger}" c:UiProps.Icon="&#xE7A7;" Margin="0,0,8,0"
+                                            Command="{Binding VoidCommand}" Visibility="{Binding CanVoid, Converter={StaticResource BoolToVis}}"/>
+                                    <Button Content="Cetak ulang" Style="{StaticResource ButtonSecondary}" c:UiProps.Icon="&#xE749;"
+                                            Command="{Binding PrintCommand}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <ItemsControl ItemsSource="{Binding Detail}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,5">
+                                            <StackPanel Margin="0,0,100,0">
+                                                <TextBlock Text="{Binding BarangNama}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                                <TextBlock Style="{StaticResource TextMuted}" FontSize="12">
+                                                    <Run Text="{Binding Jumlah, Mode=OneWay, StringFormat='#,0.##'}"/><Run Text=" "/><Run Text="{Binding Satuan, Mode=OneWay}"/>
+                                                    <Run Text="×"/><Run Text="{Binding Harga, Mode=OneWay, Converter={StaticResource Rupiah}}"/>
+                                                    <Run Text="{Binding Keterangan, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Subtotal, Converter={StaticResource Rupiah}}" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ================= Tutup kasir (FR-23, A-17) ================= -->
+            <TabItem Header="Tutup Kasir">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="420"/>
+                        <ColumnDefinition Width="18"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Style="{StaticResource Card}" VerticalAlignment="Top">
+                        <StackPanel>
+                            <TextBlock Text="Rekap hari ini" Style="{StaticResource TextH3}"/>
+                            <TextBlock Text="Semua transaksi aktif (penjualan dan penyaluran subsidi), tunai." Style="{StaticResource TextMuted}" Margin="0,2,0,14"/>
+                            <Grid Margin="0,0,0,6">
+                                <TextBlock Text="Jumlah transaksi" Style="{StaticResource TextBody}"/>
+                                <TextBlock Text="{Binding JumlahHariIni}" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,14">
+                                <TextBlock Text="Total penjualan" Style="{StaticResource TextBody}"/>
+                                <TextBlock Text="{Binding TotalHariIni, Converter={StaticResource Rupiah}}" HorizontalAlignment="Right" FontWeight="Bold" FontSize="16"/>
+                            </Grid>
+
+                            <Border Background="{DynamicResource BadgeAmanBg}" CornerRadius="8" Padding="12,10"
+                                    Visibility="{Binding TodayClosed, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Kasir hari ini sudah ditutup. Transaksi baru dan pembatalan untuk hari ini tidak dapat dilakukan."
+                                           TextWrapping="Wrap" Foreground="{DynamicResource BadgeAmanFg}"/>
+                            </Border>
+
+                            <StackPanel Visibility="{Binding TodayClosed, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
+                                <StackPanel Style="{StaticResource FormField}">
+                                    <TextBlock Text="Modal awal di laci" Style="{StaticResource TextLabel}"/>
+                                    <TextBox Text="{Binding ModalText, UpdateSourceTrigger=PropertyChanged}" c:UiProps.Placeholder="mis. 200.000"/>
+                                </StackPanel>
+                                <Grid Margin="0,0,0,14">
+                                    <TextBlock Text="Uang seharusnya" Style="{StaticResource TextBody}"/>
+                                    <TextBlock Text="{Binding UangSeharusnya, Converter={StaticResource Rupiah}}" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                                </Grid>
+                                <StackPanel Style="{StaticResource FormField}">
+                                    <TextBlock Text="Uang fisik dihitung *" Style="{StaticResource TextLabel}"/>
+                                    <TextBox Text="{Binding FisikText, UpdateSourceTrigger=PropertyChanged}" FontSize="17"/>
+                                </StackPanel>
+                                <Grid Margin="0,0,0,14">
+                                    <TextBlock Text="Selisih" Style="{StaticResource TextBody}"/>
+                                    <TextBlock Text="{Binding SelisihLabel}" HorizontalAlignment="Right" FontWeight="Bold"/>
+                                </Grid>
+                                <StackPanel Style="{StaticResource FormField}">
+                                    <TextBlock Text="Catatan (opsional)" Style="{StaticResource TextLabel}"/>
+                                    <TextBox Text="{Binding Catatan}" c:UiProps.Placeholder="mis. selisih karena uang receh"/>
+                                </StackPanel>
+                                <Button Content="Tutup Hari" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE72E;" Command="{Binding TutupCommand}"
+                                        Visibility="{Binding CanTutup, Converter={StaticResource BoolToVis}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource Card}" Padding="0">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" Text="Riwayat tutup kasir" Style="{StaticResource TextH3}" Margin="16,14,16,10"/>
+                            <DataGrid ItemsSource="{Binding RiwayatTutup}" BorderThickness="0" Background="Transparent">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Tanggal" Binding="{Binding Tanggal, StringFormat='dd/MM/yyyy'}" Width="100"/>
+                                    <DataGridTextColumn Header="Transaksi" Binding="{Binding JumlahTransaksi}" Width="85"/>
+                                    <DataGridTextColumn Header="Penjualan" Binding="{Binding TotalPenjualan, Converter={StaticResource Rupiah}}" Width="*"/>
+                                    <DataGridTextColumn Header="Seharusnya" Binding="{Binding UangSeharusnya, Converter={StaticResource Rupiah}}" Width="*"/>
+                                    <DataGridTextColumn Header="Fisik" Binding="{Binding UangFisik, Converter={StaticResource Rupiah}}" Width="*"/>
+                                    <DataGridTextColumn Header="Selisih" Binding="{Binding Selisih, Converter={StaticResource Rupiah}}" Width="*"/>
+                                    <DataGridTextColumn Header="Oleh" Binding="{Binding Pengguna}" Width="110"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

@@ -1,0 +1,127 @@
+<Window x:Class="Stokara.Views.BarangFormWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:Stokara.Controls"
+        Title="{Binding Judul}" Width="760" SizeToContent="Height" MaxHeight="900" WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False" ResizeMode="NoResize" FontFamily="Segoe UI" FontSize="14"
+        Background="{DynamicResource BrushBackground}" Foreground="{DynamicResource BrushTextPrimary}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="28,22,28,22">
+            <TextBlock Text="{Binding Judul}" Style="{StaticResource TextH2}"/>
+            <TextBlock Text="{Binding Subjudul}" Style="{StaticResource TextMuted}" Margin="0,4,0,18"/>
+
+            <Border Background="{DynamicResource BadgeMenipisBg}" CornerRadius="8" Padding="12,8" Margin="0,0,0,16"
+                    Visibility="{Binding HargaInfo, Converter={StaticResource NotEmptyToVis}}">
+                <TextBlock Text="{Binding HargaInfo}" Foreground="{DynamicResource BadgeMenipisFg}" TextWrapping="Wrap"/>
+            </Border>
+
+            <!-- Identitas barang -->
+            <Border Style="{StaticResource Card}" Padding="20,18,20,6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/><RowDefinition/><RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.ColumnSpan="3" Text="Identitas barang" Style="{StaticResource TextH3}" Margin="0,0,0,12"/>
+                    <StackPanel Grid.Row="1" Style="{StaticResource FormField}">
+                        <TextBlock Text="SKU *" Style="{StaticResource TextLabel}"/>
+                        <TextBox Text="{Binding SKU, UpdateSourceTrigger=PropertyChanged}" c:UiProps.Placeholder="mis. SBK-010" CharacterCasing="Upper"
+                                 c:UiProps.FocusOnLoad="True"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Grid.Column="2" Style="{StaticResource FormField}">
+                        <TextBlock Text="Barcode" Style="{StaticResource TextLabel}"/>
+                        <TextBox Text="{Binding Barcode, UpdateSourceTrigger=PropertyChanged}" c:UiProps.Placeholder="Scan atau ketik (opsional)"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Style="{StaticResource FormField}">
+                        <TextBlock Text="Nama barang *" Style="{StaticResource TextLabel}"/>
+                        <TextBox Text="{Binding Nama, UpdateSourceTrigger=PropertyChanged}" c:UiProps.Placeholder="mis. Minyak Goreng 2 L"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Margin="0,14,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="14"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Klasifikasi -->
+                <Border Style="{StaticResource Card}" Padding="20,18,20,6">
+                    <StackPanel>
+                        <TextBlock Text="Klasifikasi" Style="{StaticResource TextH3}" Margin="0,0,0,12"/>
+                        <StackPanel Style="{StaticResource FormField}">
+                            <TextBlock Text="Kategori *" Style="{StaticResource TextLabel}"/>
+                            <ComboBox ItemsSource="{Binding KategoriList}" SelectedItem="{Binding Kategori}" DisplayMemberPath="Nama"/>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource FormField}">
+                            <TextBlock Text="Satuan *" Style="{StaticResource TextLabel}"/>
+                            <ComboBox ItemsSource="{Binding SatuanList}" SelectedItem="{Binding Satuan}" DisplayMemberPath="Nama"/>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource FormField}">
+                            <TextBlock Text="Stok minimum (batas peringatan)" Style="{StaticResource TextLabel}"/>
+                            <TextBox Text="{Binding StokMinimum, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource FormField}" IsEnabled="{Binding CanEditHarga}">
+                            <TextBlock Text="Kepemilikan" Style="{StaticResource TextLabel}"/>
+                            <Border Style="{StaticResource SegmentHost}">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton Style="{StaticResource Segment}" Content="Milik koperasi" IsChecked="{Binding IsMilik}" GroupName="milik"/>
+                                    <RadioButton Style="{StaticResource Segment}" Content="Titipan" IsChecked="{Binding IsTitipan}" GroupName="milik"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource FormField}" IsEnabled="{Binding CanEditHarga}">
+                            <CheckBox Content="Barang subsidi (diatur HET dan kuota)" IsChecked="{Binding IsSubsidi}"
+                                      IsEnabled="{Binding IsMilik}"/>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource FormField}" Visibility="{Binding IsTitipan, Converter={StaticResource BoolToVis}}"
+                                    IsEnabled="{Binding CanEditHarga}">
+                            <TextBlock Text="Penitip *" Style="{StaticResource TextLabel}"/>
+                            <ComboBox ItemsSource="{Binding PenitipList}" SelectedItem="{Binding Penitip}" DisplayMemberPath="Nama"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Harga -->
+                <Border Grid.Column="2" Style="{StaticResource Card}" Padding="20,18,20,6">
+                    <StackPanel>
+                        <TextBlock Text="Harga (Rupiah)" Style="{StaticResource TextH3}" Margin="0,0,0,12"/>
+                        <StackPanel Style="{StaticResource FormField}">
+                            <TextBlock Text="Harga jual umum *" Style="{StaticResource TextLabel}"/>
+                            <TextBox Text="{Binding HargaUmum, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding HargaReadOnly}"/>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource FormField}">
+                            <TextBlock Text="Harga jual anggota *" Style="{StaticResource TextLabel}"/>
+                            <TextBox Text="{Binding HargaAnggota, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding HargaReadOnly}"
+                                     IsEnabled="{Binding HargaAnggotaEnabled}"/>
+                            <TextBlock Text="Barang subsidi memakai satu harga untuk semua (A-02)." Style="{StaticResource TextMuted}" FontSize="11.5"
+                                       Margin="0,4,0,0" Visibility="{Binding IsSubsidi, Converter={StaticResource BoolToVis}}"/>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource FormField}" Visibility="{Binding IsSubsidi, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="HET (Harga Eceran Tertinggi) *" Style="{StaticResource TextLabel}"/>
+                            <TextBox Text="{Binding HET, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding HargaReadOnly}"/>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource FormField}" Visibility="{Binding IsTitipan, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="Harga titip (hak penitip per unit) *" Style="{StaticResource TextLabel}"/>
+                            <TextBox Text="{Binding HargaTitip, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding HargaReadOnly}"/>
+                            <TextBlock Text="{Binding MarginInfo}" Style="{StaticResource TextMuted}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <TextBlock Text="Gunakan titik untuk ribuan dan koma untuk desimal, mis. 12.500 atau 1,5." Style="{StaticResource TextMuted}"
+                                   FontSize="11.5" Margin="0,0,0,12"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Content="Batal" Style="{StaticResource ButtonSecondary}" IsCancel="True" Margin="0,0,10,0"/>
+                <Button Content="Simpan" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE74E;" IsDefault="True"
+                        Command="{Binding SaveCommand}"/>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

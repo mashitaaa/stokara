@@ -1,0 +1,261 @@
+<Window x:Class="Stokara.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:Stokara.Controls"
+        xmlns:infra="clr-namespace:Stokara.Infrastructure"
+        Title="STOKARA | Inventori &amp; Penyaluran Gerai Kopdes Merah Putih"
+        Width="1366" Height="800" MinWidth="1280" MinHeight="720" WindowStartupLocation="CenterScreen" WindowState="Maximized"
+        FontFamily="Segoe UI" FontSize="14"
+        Background="{DynamicResource BrushBackground}" Foreground="{DynamicResource BrushTextPrimary}">
+    <Window.InputBindings>
+        <KeyBinding Key="F2" Command="{Binding NavigateCommand}" CommandParameter="kasir"/>
+        <KeyBinding Key="F5" Command="{Binding RefreshCommand}"/>
+    </Window.InputBindings>
+
+    <Window.Resources>
+        <!-- Item menu sidebar -->
+        <Style x:Key="NavButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource BrushSidebarText}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="Transparent" CornerRadius="9" Padding="12,9" Margin="0,1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="28"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Icon}" FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Title}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="{Binding Shortcut}" FontSize="11" Opacity="0.6" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BrushSidebarItemHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BrushSidebarItemHover}"/>
+                            </Trigger>
+                            <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BrushSidebarActive}"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="248"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ===================== Sidebar ===================== -->
+        <Border Background="{DynamicResource BrushSidebar}">
+            <DockPanel Margin="14,18,14,14">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="6,0,0,22">
+                    <Border Width="40" Height="40" CornerRadius="11" Background="{DynamicResource BrushPrimary}">
+                        <TextBlock Text="&#xE719;" FontFamily="Segoe MDL2 Assets" FontSize="19" Foreground="#FFFFFF"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="STOKARA" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource BrushSidebarText}"/>
+                        <TextBlock Text="{Binding NamaGerai}" FontSize="11.5" Foreground="{DynamicResource BrushSidebarMuted}"
+                                   TextTrimming="CharacterEllipsis" MaxWidth="160"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Kartu pengguna + keluar -->
+                <Border DockPanel.Dock="Bottom" Background="{DynamicResource BrushSidebarItemHover}" CornerRadius="10" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="34" Height="34" CornerRadius="17" Background="{DynamicResource BrushAccent}">
+                            <TextBlock Text="{Binding UserInisial}" FontWeight="Bold" Foreground="{DynamicResource BrushOnAccent}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="10,0,6,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding UserNama}" FontWeight="SemiBold" Foreground="{DynamicResource BrushSidebarText}" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding UserRole}" FontSize="11.5" Foreground="{DynamicResource BrushSidebarMuted}"/>
+                        </StackPanel>
+                        <Button Grid.Column="2" Style="{StaticResource ButtonIcon}" c:UiProps.Icon="&#xE7E8;" ToolTip="Keluar (logout)"
+                                Foreground="{DynamicResource BrushSidebarText}" Click="Logout_Click"/>
+                    </Grid>
+                </Border>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,0,12">
+                    <ItemsControl ItemsSource="{Binding Groups}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,0,0,14">
+                                    <TextBlock Text="{Binding Title}" FontSize="11" FontWeight="SemiBold" Margin="12,0,0,6"
+                                               Foreground="{DynamicResource BrushSidebarMuted}"/>
+                                    <ItemsControl ItemsSource="{Binding Items}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Style="{StaticResource NavButton}"
+                                                        Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding Key}"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- ===================== Konten ===================== -->
+        <DockPanel Grid.Column="1">
+            <!-- Header -->
+            <Border DockPanel.Dock="Top" Background="{DynamicResource BrushSurface}" BorderBrush="{DynamicResource BrushBorder}"
+                    BorderThickness="0,0,0,1" Padding="28,14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding PageTitle}" Style="{StaticResource TextH2}" VerticalAlignment="Center"/>
+                        <Border Margin="14,0,0,0" CornerRadius="10" Padding="10,3" Background="{DynamicResource BrushSurfaceAlt}"
+                                Visibility="{Binding CurrentPage.IsBusy, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="Memuat…" FontSize="12" Foreground="{DynamicResource BrushTextSecondary}"/>
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Indikator status database (FR-31) -->
+                        <Border CornerRadius="12" Padding="10,5" Margin="0,0,10,0">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="{DynamicResource BadgeAmanBg}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DbOnline}" Value="False">
+                                            <Setter Property="Background" Value="{DynamicResource BadgeHabisBg}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="8" Height="8" VerticalAlignment="Center">
+                                    <Ellipse.Style>
+                                        <Style TargetType="Ellipse">
+                                            <Setter Property="Fill" Value="{DynamicResource BrushSuccess}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding DbOnline}" Value="False">
+                                                    <Setter Property="Fill" Value="{DynamicResource BrushDanger}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Ellipse.Style>
+                                </Ellipse>
+                                <TextBlock Text="{Binding DbStatusText}" FontSize="12" FontWeight="SemiBold" Margin="7,0,0,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource BadgeAmanFg}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding DbOnline}" Value="False">
+                                                    <Setter Property="Foreground" Value="{DynamicResource BadgeHabisFg}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text=" · offline-ready" FontSize="12" Foreground="{DynamicResource BrushTextSecondary}"/>
+                            </StackPanel>
+                        </Border>
+                        <Button Style="{StaticResource ButtonIcon}" c:UiProps.Icon="&#xE72C;" ToolTip="Muat ulang (F5)" Command="{Binding RefreshCommand}"/>
+                        <Button Style="{StaticResource ButtonIcon}" c:UiProps.Icon="{Binding ThemeIcon}" ToolTip="{Binding ThemeTooltip}"
+                                Command="{Binding ToggleThemeCommand}" Margin="4,0,0,0"/>
+                        <Button Style="{StaticResource ButtonIcon}" c:UiProps.Icon="&#xE897;" ToolTip="Bantuan"
+                                Command="{Binding NavigateCommand}" CommandParameter="bantuan" Margin="4,0,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Halaman aktif (transisi fade + geser) -->
+            <Grid>
+                <ContentControl x:Name="PageHost" Content="{Binding CurrentPage}" c:PageTransition.Enabled="True" Focusable="False"/>
+
+                <!-- Toast notifikasi -->
+                <ItemsControl ItemsSource="{Binding Source={x:Static infra:ToastService.Items}}"
+                              HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,24,24" Width="380" Focusable="False">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border x:Name="ToastCard" Background="{DynamicResource BrushSurface}" CornerRadius="10" Margin="0,8,0,0"
+                                    BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1" Opacity="0">
+                                <Border.RenderTransform>
+                                    <TranslateTransform X="60"/>
+                                </Border.RenderTransform>
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="18" ShadowDepth="3" Opacity="0.18" Color="#000000"/>
+                                </Border.Effect>
+                                <Border.Triggers>
+                                    <EventTrigger RoutedEvent="Loaded">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.25"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                                 To="0" Duration="0:0:0.3">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <CubicEase EasingMode="EaseOut"/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                </Border.Triggers>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border x:Name="Stripe" CornerRadius="10,0,0,10" Background="{DynamicResource BrushInfo}"/>
+                                    <TextBlock x:Name="Ic" Grid.Column="1" Text="{Binding Icon}" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                               Margin="14,14,10,0" VerticalAlignment="Top" Foreground="{DynamicResource BrushInfo}"/>
+                                    <StackPanel Grid.Column="2" Margin="0,12,8,12">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="{DynamicResource BrushTextPrimary}"/>
+                                        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="13" Margin="0,2,0,0"
+                                                   Foreground="{DynamicResource BrushTextSecondary}"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="3" Style="{StaticResource ButtonIcon}" c:UiProps.Icon="&#xE711;" VerticalAlignment="Top"
+                                            Margin="0,6,6,0" Width="28" Height="28" Padding="4" Click="DismissToast_Click"/>
+                                </Grid>
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Kind}" Value="Success">
+                                    <Setter TargetName="Stripe" Property="Background" Value="{DynamicResource BrushSuccess}"/>
+                                    <Setter TargetName="Ic" Property="Foreground" Value="{DynamicResource BrushSuccess}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Kind}" Value="Warning">
+                                    <Setter TargetName="Stripe" Property="Background" Value="{DynamicResource BrushWarning}"/>
+                                    <Setter TargetName="Ic" Property="Foreground" Value="{DynamicResource BrushWarning}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Kind}" Value="Error">
+                                    <Setter TargetName="Stripe" Property="Background" Value="{DynamicResource BrushDanger}"/>
+                                    <Setter TargetName="Ic" Property="Foreground" Value="{DynamicResource BrushDanger}"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </DockPanel>
+    </Grid>
+</Window>

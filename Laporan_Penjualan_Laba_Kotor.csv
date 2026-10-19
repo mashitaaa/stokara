@@ -1,0 +1,16 @@
+﻿Laporan Penjualan & Laba Kotor
+01/10/2026 s.d. 18/10/2026
+
+SKU;Barang;Kategori;Jenis;Jumlah Terjual;Satuan;Penjualan Rp;HPP atau Hak Penitip Rp;Laba Kotor Rp
+SBK-001;Beras Premium 5 kg;Sembako;BEBAS;17;bungkus;1254000;1088000;166000
+UMK-002;Madu Hutan 250 ml;Produk UMKM;TITIPAN;8;botol;440000;360000;80000
+SBK-005;Telur Ayam;Sembako;BEBAS;13;kg;376000;331500;44500
+SBK-003;Minyak Goreng 1 L;Sembako;BEBAS;20;botol;356500;310000;46500
+SBK-004;Gula Pasir 1 kg;Sembako;BEBAS;20;kg;345000;300000;45000
+PPK-001;Pupuk Urea Bersubsidi 50 kg;Pupuk & Pertanian;SUBSIDI;2;sak;225000;210000;15000
+UMK-001;Keripik Singkong Bu Sri;Produk UMKM;TITIPAN;15;bungkus;150000;120000;30000
+GAS-001;LPG 3 kg;Gas & Energi;SUBSIDI;7;tabung;126000;112000;14000
+PPK-002;Pupuk NPK Bersubsidi 50 kg;Pupuk & Pertanian;SUBSIDI;1;sak;115000;107000;8000
+RT-001;Sabun Cuci Piring 800 ml;Kebutuhan Rumah Tangga;BEBAS;6;botol;88000;75000;13000
+MNM-001;Air Mineral 600 ml;Minuman;BEBAS;22;botol;84000;61600;22400
+SBK-002;Beras SPHP 5 kg;Sembako;SUBSIDI;1;bungkus;62500;58000;4500

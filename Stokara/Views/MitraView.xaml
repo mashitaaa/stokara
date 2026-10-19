@@ -1,0 +1,377 @@
+<UserControl x:Class="Stokara.Views.MitraView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:Stokara.Controls">
+    <Grid Margin="28,14,28,24">
+        <TabControl SelectedIndex="{Binding Tab}">
+            <!-- ================= Anggota ================= -->
+            <TabItem Header="Anggota" Visibility="{Binding ShowAnggota, Converter={StaticResource BoolToVis}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="18"/>
+                        <ColumnDefinition Width="400"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Style="{StaticResource Card}" Padding="0">
+                        <DockPanel>
+                            <Grid DockPanel.Dock="Top" Margin="14,12">
+                                <TextBox x:Name="SearchBox" Text="{Binding CariAnggota, UpdateSourceTrigger=PropertyChanged}" Width="300" HorizontalAlignment="Left"
+                                         c:UiProps.Placeholder="Cari nama / nomor / NIK, lalu Enter">
+                                    <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding CariCommand}"/></TextBox.InputBindings>
+                                </TextBox>
+                                <Button HorizontalAlignment="Right" Content="Anggota Baru" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE8FA;"
+                                        Command="{Binding NewAnggotaCommand}" Visibility="{Binding CanAddAnggota, Converter={StaticResource BoolToVis}}"/>
+                            </Grid>
+                            <DataGrid ItemsSource="{Binding AnggotaList}" SelectedItem="{Binding SelectedAnggota}" BorderThickness="0" Background="Transparent">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Nomor" Binding="{Binding NomorAnggota}" Width="100"/>
+                                    <DataGridTextColumn Header="Nama" Binding="{Binding Nama}" Width="*"/>
+                                    <DataGridTextColumn Header="NIK" Binding="{Binding NikTampil}" Width="160"/>
+                                    <DataGridTextColumn Header="Dusun" Binding="{Binding Dusun}" Width="110"/>
+                                    <DataGridTextColumn Header="Bergabung" Binding="{Binding TanggalBergabung, StringFormat='dd/MM/yyyy'}" Width="100"/>
+                                    <DataGridTemplateColumn Header="Status" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate><ContentControl Style="{StaticResource Badge}" Content="{Binding Status}"/></DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </Border>
+                    <Border Grid.Column="2" Style="{StaticResource Card}" IsEnabled="{Binding AnggotaEditable}">
+                        <StackPanel DataContext="{Binding EditAnggota}">
+                            <TextBlock Text="Data anggota" Style="{StaticResource TextH3}" Margin="0,0,0,12"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="10"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel Style="{StaticResource FormField}">
+                                    <TextBlock Text="Nomor anggota *" Style="{StaticResource TextLabel}"/>
+                                    <TextBox Text="{Binding NomorAnggota}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Style="{StaticResource FormField}">
+                                    <TextBlock Text="Status" Style="{StaticResource TextLabel}"/>
+                                    <ComboBox ItemsSource="{Binding DataContext.StatusOptions, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                              SelectedItem="{Binding Status}"/>
+                                </StackPanel>
+                            </Grid>
+                            <StackPanel Style="{StaticResource FormField}">
+                                <TextBlock Text="NIK (16 digit) *" Style="{StaticResource TextLabel}"/>
+                                <TextBox Text="{Binding NIK}" MaxLength="16"/>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource FormField}">
+                                <TextBlock Text="Nama lengkap *" Style="{StaticResource TextLabel}"/>
+                                <TextBox Text="{Binding Nama}"/>
+                            </StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="10"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel Style="{StaticResource FormField}">
+                                    <TextBlock Text="Dusun" Style="{StaticResource TextLabel}"/>
+                                    <TextBox Text="{Binding Dusun}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Style="{StaticResource FormField}">
+                                    <TextBlock Text="Telepon" Style="{StaticResource TextLabel}"/>
+                                    <TextBox Text="{Binding Telepon}"/>
+                                </StackPanel>
+                            </Grid>
+                            <StackPanel Style="{StaticResource FormField}">
+                                <TextBlock Text="Alamat" Style="{StaticResource TextLabel}"/>
+                                <TextBox Text="{Binding Alamat}"/>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource FormField}">
+                                <TextBlock Text="Tanggal bergabung" Style="{StaticResource TextLabel}"/>
+                                <DatePicker SelectedDate="{Binding TanggalBergabung}"/>
+                            </StackPanel>
+                            <Button Content="Simpan Anggota" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE74E;"
+                                    Command="{Binding DataContext.SaveAnggotaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ================= Penerima subsidi & kuota ================= -->
+            <TabItem Header="Penerima Subsidi &amp; Kuota" Visibility="{Binding ShowPenerima, Converter={StaticResource BoolToVis}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Grid Height="430">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="18"/>
+                                <ColumnDefinition Width="400"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource Card}" Padding="0">
+                                <DockPanel>
+                                    <Grid DockPanel.Dock="Top" Margin="14,12">
+                                        <TextBox Text="{Binding CariPenerima, UpdateSourceTrigger=PropertyChanged}" Width="300" HorizontalAlignment="Left"
+                                                 c:UiProps.Placeholder="Cari NIK / nama, lalu Enter">
+                                            <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding CariCommand}"/></TextBox.InputBindings>
+                                        </TextBox>
+                                        <Button HorizontalAlignment="Right" Content="Penerima Baru" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE8FA;"
+                                                Command="{Binding NewPenerimaCommand}" Visibility="{Binding IsManajer, Converter={StaticResource BoolToVis}}"/>
+                                    </Grid>
+                                    <DataGrid ItemsSource="{Binding PenerimaList}" SelectedItem="{Binding SelectedPenerima}" BorderThickness="0" Background="Transparent">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="NIK" Binding="{Binding NikTampil}" Width="160"/>
+                                            <DataGridTextColumn Header="Nama" Binding="{Binding Nama}" Width="*"/>
+                                            <DataGridTextColumn Header="Jenis" Binding="{Binding JenisLabel}" Width="120"/>
+                                            <DataGridTextColumn Header="Dusun" Binding="{Binding Dusun}" Width="110"/>
+                                            <DataGridTemplateColumn Header="Status" Width="100">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate><ContentControl Style="{StaticResource Badge}" Content="{Binding Status}"/></DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </DockPanel>
+                            </Border>
+                            <Border Grid.Column="2" Style="{StaticResource Card}">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <StackPanel>
+                                        <StackPanel IsEnabled="{Binding IsManajer}">
+                                            <TextBlock Text="Data penerima" Style="{StaticResource TextH3}" Margin="0,0,0,12"/>
+                                            <StackPanel Style="{StaticResource FormField}">
+                                                <TextBlock Text="NIK (16 digit) *" Style="{StaticResource TextLabel}"/>
+                                                <TextBox Text="{Binding EditPenerima.NIK}" MaxLength="16"/>
+                                            </StackPanel>
+                                            <StackPanel Style="{StaticResource FormField}">
+                                                <TextBlock Text="Nama *" Style="{StaticResource TextLabel}"/>
+                                                <TextBox Text="{Binding EditPenerima.Nama}"/>
+                                            </StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="10"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                                <StackPanel Style="{StaticResource FormField}">
+                                                    <TextBlock Text="Jenis penerima" Style="{StaticResource TextLabel}"/>
+                                                    <ComboBox ItemsSource="{Binding JenisPenerimaOptions}" SelectedValuePath="Key" DisplayMemberPath="Value"
+                                                              SelectedValue="{Binding EditPenerima.JenisPenerima}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="2" Style="{StaticResource FormField}">
+                                                    <TextBlock Text="Status" Style="{StaticResource TextLabel}"/>
+                                                    <ComboBox ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding EditPenerima.Status}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                            <StackPanel Style="{StaticResource FormField}">
+                                                <TextBlock Text="Dusun" Style="{StaticResource TextLabel}"/>
+                                                <TextBox Text="{Binding EditPenerima.Dusun}"/>
+                                            </StackPanel>
+                                            <StackPanel Style="{StaticResource FormField}" Visibility="{Binding IsManajer, Converter={StaticResource BoolToVis}}">
+                                                <TextBlock Text="Terhubung dengan anggota (opsional, A-11)" Style="{StaticResource TextLabel}"/>
+                                                <ComboBox ItemsSource="{Binding AnggotaPilihan}" SelectedItem="{Binding EditPenerimaAnggota}" DisplayMemberPath="Nama"/>
+                                            </StackPanel>
+                                            <Button Content="Simpan Penerima" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE74E;"
+                                                    Command="{Binding SavePenerimaCommand}" Visibility="{Binding IsManajer, Converter={StaticResource BoolToVis}}"/>
+                                        </StackPanel>
+                                        <Separator Margin="0,16"/>
+                                        <TextBlock Style="{StaticResource TextH3}" Text="{Binding Periode, StringFormat='Sisa kuota periode {0}'}"/>
+                                        <TextBlock Text="Belum ada aturan kuota untuk jenis penerima ini." Style="{StaticResource TextMuted}" Margin="0,6,0,0"
+                                                   Visibility="{Binding SisaKuota.Count, Converter={StaticResource NotEmptyToVis}, ConverterParameter=Invert}"/>
+                                        <ItemsControl ItemsSource="{Binding SisaKuota}" Margin="0,8,0,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Margin="0,4,0,6">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding BarangNama}" FontWeight="SemiBold" Margin="0,0,100,0" TextTrimming="CharacterEllipsis"/>
+                                                            <TextBlock Text="{Binding Ringkas}" HorizontalAlignment="Right" FontSize="12.5"/>
+                                                        </Grid>
+                                                        <ProgressBar Value="{Binding PersenTerpakai, Mode=OneWay}" Maximum="100" Margin="0,5,0,0" Foreground="{DynamicResource ChartSeries4}"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Border>
+                        </Grid>
+
+                        <!-- Aturan kuota (A-03) -->
+                        <Border Style="{StaticResource Card}" Margin="0,18,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="18"/>
+                                    <ColumnDefinition Width="360"/>
+                                </Grid.ColumnDefinitions>
+                                <DockPanel>
+                                    <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
+                                        <StackPanel>
+                                            <TextBlock Text="Aturan kuota (Barang × Jenis Penerima × Periode)" Style="{StaticResource TextH3}"/>
+                                            <TextBlock Text="Kuota berlaku untuk setiap penerima pada jenis tersebut. Pemakaian dicatat per penerima."
+                                                       Style="{StaticResource TextMuted}"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                                            <TextBox Text="{Binding Periode, UpdateSourceTrigger=PropertyChanged}" Width="100" c:UiProps.Placeholder="yyyy-MM">
+                                                <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding LoadAturanCommand}"/></TextBox.InputBindings>
+                                            </TextBox>
+                                            <Button Style="{StaticResource ButtonIcon}" c:UiProps.Icon="&#xE72C;" ToolTip="Tampilkan periode" Margin="6,0,0,0"
+                                                    Command="{Binding LoadAturanCommand}"/>
+                                            <Button Content="Salin dari periode lain" Style="{StaticResource ButtonGhost}" c:UiProps.Icon="&#xE8C8;" Margin="6,0,0,0"
+                                                    Command="{Binding CopyAturanCommand}" Visibility="{Binding IsManajer, Converter={StaticResource BoolToVis}}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <DataGrid ItemsSource="{Binding AturanList}" SelectedItem="{Binding SelectedAturan}" MaxHeight="300">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Barang subsidi" Binding="{Binding BarangNama}" Width="*"/>
+                                            <DataGridTextColumn Header="Jenis penerima" Binding="{Binding JenisLabel}" Width="130"/>
+                                            <DataGridTextColumn Header="Periode" Binding="{Binding Periode}" Width="85"/>
+                                            <DataGridTextColumn Header="Kuota / penerima" Binding="{Binding JumlahKuota, StringFormat='#,0.##'}" Width="120"/>
+                                            <DataGridTextColumn Header="Penerima aktif" Binding="{Binding JumlahPenerima}" Width="110"/>
+                                            <DataGridTextColumn Header="Total terpakai" Binding="{Binding TotalTerpakai, StringFormat='#,0.##'}" Width="110"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </DockPanel>
+                                <StackPanel Grid.Column="2" IsEnabled="{Binding IsManajer}">
+                                    <TextBlock Text="{Binding AturanFormJudul}" Style="{StaticResource TextH3}" Margin="0,0,0,10"/>
+                                    <StackPanel Style="{StaticResource FormField}">
+                                        <TextBlock Text="Barang subsidi" Style="{StaticResource TextLabel}"/>
+                                        <ComboBox ItemsSource="{Binding BarangSubsidi}" SelectedItem="{Binding AturanBarang}" DisplayMemberPath="Nama"/>
+                                    </StackPanel>
+                                    <StackPanel Style="{StaticResource FormField}">
+                                        <TextBlock Text="Jenis penerima" Style="{StaticResource TextLabel}"/>
+                                        <ComboBox ItemsSource="{Binding JenisPenerimaOptions}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedValue="{Binding AturanJenis}"/>
+                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="10"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                        <StackPanel Style="{StaticResource FormField}">
+                                            <TextBlock Text="Periode" Style="{StaticResource TextLabel}"/>
+                                            <TextBox Text="{Binding AturanPeriode, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2" Style="{StaticResource FormField}">
+                                            <TextBlock Text="Kuota per penerima" Style="{StaticResource TextLabel}"/>
+                                            <TextBox Text="{Binding AturanJumlah, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="Hapus" Style="{StaticResource ButtonGhost}" c:UiProps.Icon="&#xE74D;" Margin="0,0,6,0" Command="{Binding DeleteAturanCommand}"/>
+                                        <Button Content="Baru" Style="{StaticResource ButtonSecondary}" Margin="0,0,6,0" Command="{Binding NewAturanCommand}"/>
+                                        <Button Content="Simpan" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE74E;" Command="{Binding SaveAturanCommand}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ================= Pemasok ================= -->
+            <TabItem Header="Pemasok" Visibility="{Binding ShowPemasok, Converter={StaticResource BoolToVis}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="18"/>
+                        <ColumnDefinition Width="380"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Style="{StaticResource Card}" Padding="0">
+                        <DockPanel>
+                            <Grid DockPanel.Dock="Top" Margin="14,12">
+                                <TextBox Text="{Binding CariPemasok, UpdateSourceTrigger=PropertyChanged}" Width="280" HorizontalAlignment="Left"
+                                         c:UiProps.Placeholder="Cari kode / nama, lalu Enter">
+                                    <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding CariCommand}"/></TextBox.InputBindings>
+                                </TextBox>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding IsManajer, Converter={StaticResource BoolToVis}}">
+                                    <Button Content="{Binding PemasokToggleLabel}" Style="{StaticResource ButtonGhost}" Margin="0,0,6,0" Command="{Binding TogglePemasokCommand}"/>
+                                    <Button Content="Pemasok Baru" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE710;" Command="{Binding NewPemasokCommand}"/>
+                                </StackPanel>
+                            </Grid>
+                            <DataGrid ItemsSource="{Binding PemasokList}" SelectedItem="{Binding SelectedPemasok}" BorderThickness="0" Background="Transparent">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Kode" Binding="{Binding Kode}" Width="100"/>
+                                    <DataGridTextColumn Header="Nama" Binding="{Binding Nama}" Width="*"/>
+                                    <DataGridTextColumn Header="Jenis" Binding="{Binding Jenis}" Width="80"/>
+                                    <DataGridTextColumn Header="Telepon" Binding="{Binding Telepon}" Width="120"/>
+                                    <DataGridTemplateColumn Header="Status" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate><ContentControl Style="{StaticResource Badge}" Content="{Binding StatusLabel}"/></DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </Border>
+                    <Border Grid.Column="2" Style="{StaticResource Card}" IsEnabled="{Binding IsManajer}">
+                        <StackPanel>
+                            <TextBlock Text="Data pemasok" Style="{StaticResource TextH3}" Margin="0,0,0,12"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="10"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel Style="{StaticResource FormField}">
+                                    <TextBlock Text="Kode *" Style="{StaticResource TextLabel}"/>
+                                    <TextBox Text="{Binding EditPemasok.Kode}" CharacterCasing="Upper"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Style="{StaticResource FormField}">
+                                    <TextBlock Text="Jenis" Style="{StaticResource TextLabel}"/>
+                                    <ComboBox ItemsSource="{Binding JenisPemasokOptions}" SelectedItem="{Binding EditPemasok.Jenis}"/>
+                                </StackPanel>
+                            </Grid>
+                            <StackPanel Style="{StaticResource FormField}">
+                                <TextBlock Text="Nama *" Style="{StaticResource TextLabel}"/>
+                                <TextBox Text="{Binding EditPemasok.Nama}"/>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource FormField}">
+                                <TextBlock Text="Telepon" Style="{StaticResource TextLabel}"/>
+                                <TextBox Text="{Binding EditPemasok.Telepon}"/>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource FormField}">
+                                <TextBlock Text="Alamat" Style="{StaticResource TextLabel}"/>
+                                <TextBox Text="{Binding EditPemasok.Alamat}"/>
+                            </StackPanel>
+                            <Button Content="Simpan Pemasok" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE74E;" Command="{Binding SavePemasokCommand}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ================= Penitip ================= -->
+            <TabItem Header="Penitip" Visibility="{Binding ShowPenitip, Converter={StaticResource BoolToVis}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="18"/>
+                        <ColumnDefinition Width="380"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Style="{StaticResource Card}" Padding="0">
+                        <DockPanel>
+                            <Grid DockPanel.Dock="Top" Margin="14,12">
+                                <TextBox Text="{Binding CariPenitip, UpdateSourceTrigger=PropertyChanged}" Width="280" HorizontalAlignment="Left"
+                                         c:UiProps.Placeholder="Cari nama, lalu Enter">
+                                    <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding CariCommand}"/></TextBox.InputBindings>
+                                </TextBox>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="{Binding IsManajer, Converter={StaticResource BoolToVis}}">
+                                    <Button Content="{Binding PenitipToggleLabel}" Style="{StaticResource ButtonGhost}" Margin="0,0,6,0" Command="{Binding TogglePenitipCommand}"/>
+                                    <Button Content="Penitip Baru" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE710;" Command="{Binding NewPenitipCommand}"/>
+                                </StackPanel>
+                            </Grid>
+                            <DataGrid ItemsSource="{Binding PenitipList}" SelectedItem="{Binding SelectedPenitip}" BorderThickness="0" Background="Transparent">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Nama" Binding="{Binding Nama}" Width="*"/>
+                                    <DataGridTextColumn Header="Telepon" Binding="{Binding Telepon}" Width="130"/>
+                                    <DataGridTextColumn Header="Alamat" Binding="{Binding Alamat}" Width="*"/>
+                                    <DataGridTemplateColumn Header="Status" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate><ContentControl Style="{StaticResource Badge}" Content="{Binding StatusLabel}"/></DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </Border>
+                    <Border Grid.Column="2" Style="{StaticResource Card}" IsEnabled="{Binding IsManajer}">
+                        <StackPanel>
+                            <TextBlock Text="Data penitip" Style="{StaticResource TextH3}" Margin="0,0,0,6"/>
+                            <TextBlock Text="Skema konsinyasi: harga titip tetap per barang (A-05). Harga titip diatur di menu Barang."
+                                       Style="{StaticResource TextMuted}" Margin="0,0,0,12"/>
+                            <StackPanel Style="{StaticResource FormField}">
+                                <TextBlock Text="Nama *" Style="{StaticResource TextLabel}"/>
+                                <TextBox Text="{Binding EditPenitip.Nama}"/>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource FormField}">
+                                <TextBlock Text="Telepon" Style="{StaticResource TextLabel}"/>
+                                <TextBox Text="{Binding EditPenitip.Telepon}"/>
+                            </StackPanel>
+                            <StackPanel Style="{StaticResource FormField}">
+                                <TextBlock Text="Alamat" Style="{StaticResource TextLabel}"/>
+                                <TextBox Text="{Binding EditPenitip.Alamat}"/>
+                            </StackPanel>
+                            <Button Content="Simpan Penitip" Style="{StaticResource ButtonPrimary}" c:UiProps.Icon="&#xE74E;" Command="{Binding SavePenitipCommand}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>
